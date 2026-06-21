@@ -1,6 +1,6 @@
 ﻿namespace Lox
 {
-    internal class Scanner(string source)
+    public class Scanner(string source)
     {
         int start = 0;
         int current = 0;
@@ -134,7 +134,7 @@
 
         void AddToken(TokenTypeEnum type, object? literal = null)
         {
-            var text = source.Substring(start, current);
+            var text = source.Substring(start, current - start);
             tokens.Add(new Token(type, text, literal, line));
         }
 
@@ -181,7 +181,7 @@
             Advance();
 
             // trim the surrounding quotes
-            var value = source.Substring(start + 1, current - 1);
+            var value = source.Substring(start + 1, current - start - 2);
             AddToken(TokenTypeEnum.STRING, value);
         }
 
@@ -224,7 +224,7 @@
                 Advance();
             }
 
-            var text = source.Substring(start, current);
+            var text = source.Substring(start, current - start);
             var type = TokenTypeEnum.IDENTIFIER;
             if (keywords.TryGetValue(text, out TokenTypeEnum value))
             {

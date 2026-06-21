@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="Lox.Tests/Lox.Tests.csproj" Id="810d9d99-90a7-4e35-b033-fea50df0595e" />
   <Project Path="Lox/Lox.csproj" />
 </Solution>
