@@ -22,13 +22,13 @@ namespace Lox
         string Parenthisize(string name, params Expr[] exprs)
         {
             var sb = new StringBuilder();
-            sb.Append("(").Append(name);
+            sb.Append('(').Append(name);
             foreach (var expr in exprs)
             {
-                sb.Append(" ");
+                sb.Append(' ');
                 sb.Append(expr.Accept(this));
             }
-            sb.Append(")");
+            sb.Append(')');
             return sb.ToString();
         }
     }

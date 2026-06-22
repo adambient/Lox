@@ -1,4 +1,6 @@
-﻿namespace Lox
+﻿using static Lox.TokenTypeEnum;
+
+namespace Lox
 {
     public class Scanner(string source)
     {
@@ -8,22 +10,22 @@
         readonly List<Token> tokens = [];
         readonly static Dictionary<string, TokenTypeEnum> keywords = new()
         {
-            { "and", TokenTypeEnum.AND },
-            { "class", TokenTypeEnum.CLASS },
-            { "else", TokenTypeEnum.ELSE },
-            { "false", TokenTypeEnum.FALSE },
-            { "for", TokenTypeEnum.FOR },
-            { "fun", TokenTypeEnum.FUN },
-            { "if", TokenTypeEnum.IF },
-            { "nil", TokenTypeEnum.NIL },
-            { "or", TokenTypeEnum.OR },
-            { "print", TokenTypeEnum.PRINT },
-            { "return", TokenTypeEnum.RETURN },
-            { "super", TokenTypeEnum.SUPER },
-            { "this", TokenTypeEnum.THIS },
-            { "true", TokenTypeEnum.TRUE },
-            { "var", TokenTypeEnum.VAR },
-            { "while", TokenTypeEnum.WHILE }
+            { "and", AND },
+            { "class", CLASS },
+            { "else", ELSE },
+            { "false", FALSE },
+            { "for", FOR },
+            { "fun", FUN },
+            { "if", IF },
+            { "nil", NIL },
+            { "or", OR },
+            { "print", PRINT },
+            { "return", RETURN },
+            { "super", SUPER },
+            { "this", THIS },
+            { "true", TRUE },
+            { "var", VAR },
+            { "while", WHILE }
         };
 
         public List<Token> ScanTokens()
@@ -35,7 +37,7 @@
                 ScanToken();
             }
 
-            tokens.Add(new Token(TokenTypeEnum.EOF, string.Empty, null, line));
+            tokens.Add(new Token(EOF, string.Empty, null, line));
             return tokens;
         }
 
@@ -47,46 +49,46 @@
             switch (c)
             {
                 case '(':
-                    AddToken(TokenTypeEnum.LEFT_PAREN);
+                    AddToken(LEFT_PAREN);
                     break;
                 case ')':
-                    AddToken(TokenTypeEnum.RIGHT_PAREN);
+                    AddToken(RIGHT_PAREN);
                     break;
                 case '{':
-                    AddToken(TokenTypeEnum.LEFT_BRACE);
+                    AddToken(LEFT_BRACE);
                     break;
                 case '}':
-                    AddToken(TokenTypeEnum.RIGHT_BRACE);
+                    AddToken(RIGHT_BRACE);
                     break;
                 case ',':
-                    AddToken(TokenTypeEnum.COMMA);
+                    AddToken(COMMA);
                     break;
                 case '.':
-                    AddToken(TokenTypeEnum.DOT);
+                    AddToken(DOT);
                     break;
                 case '-':
-                    AddToken(TokenTypeEnum.MINUS);
+                    AddToken(MINUS);
                     break;
                 case '+':
-                    AddToken(TokenTypeEnum.PLUS);
+                    AddToken(PLUS);
                     break;
                 case ';':
-                    AddToken(TokenTypeEnum.SEMICOLON);
+                    AddToken(SEMICOLON);
                     break;
                 case '*':
-                    AddToken(TokenTypeEnum.STAR);
+                    AddToken(STAR);
                     break;
                 case '!':
-                    AddToken(Match('=') ? TokenTypeEnum.BANG_EQUAL : TokenTypeEnum.BANG);
+                    AddToken(Match('=') ? BANG_EQUAL : BANG);
                     break;
                 case '=':
-                    AddToken(Match('=') ? TokenTypeEnum.EQUAL_EQUAL : TokenTypeEnum.EQUAL);
+                    AddToken(Match('=') ? EQUAL_EQUAL : EQUAL);
                     break;
                 case '<':
-                    AddToken(Match('=') ? TokenTypeEnum.LESS_EQUAL : TokenTypeEnum.LESS);
+                    AddToken(Match('=') ? LESS_EQUAL : LESS);
                     break;
                 case '>':
-                    AddToken(Match('=') ? TokenTypeEnum.GREATER_EQUAL : TokenTypeEnum.GREATER);
+                    AddToken(Match('=') ? GREATER_EQUAL : GREATER);
                     break;
                 case '/':
                     if (Match('/'))
@@ -99,7 +101,7 @@
                     }
                     else
                     {
-                        AddToken(TokenTypeEnum.SLASH);
+                        AddToken(SLASH);
                     }
                     break;
                 case ' ':
@@ -182,7 +184,7 @@
 
             // trim the surrounding quotes
             var value = source.Substring(start + 1, current - start - 2);
-            AddToken(TokenTypeEnum.STRING, value);
+            AddToken(STRING, value);
         }
 
         void Number()
@@ -204,7 +206,7 @@
                 }
             }
 
-            AddToken(TokenTypeEnum.NUMBER, double.Parse(source.Substring(start, current)));
+            AddToken(NUMBER, double.Parse(source.Substring(start, current)));
         }
 
         char PeekNext()
@@ -225,7 +227,7 @@
             }
 
             var text = source.Substring(start, current - start);
-            var type = TokenTypeEnum.IDENTIFIER;
+            var type = IDENTIFIER;
             if (keywords.TryGetValue(text, out TokenTypeEnum value))
             {
                 type = value;
