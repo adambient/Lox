@@ -206,7 +206,7 @@ namespace Lox
                 }
             }
 
-            AddToken(NUMBER, double.Parse(source.Substring(start, current)));
+            AddToken(NUMBER, double.Parse(source.Substring(start, current - start)));
         }
 
         char PeekNext()

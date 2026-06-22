@@ -7,7 +7,7 @@ namespace Lox.Tests
     {
         static Expr expression;
         static AstPrinter printer;
-        static string output;
+        static string? output;
 
         Establish context = () =>
         {
