@@ -4,6 +4,10 @@ namespace Lox
 {
     internal class Lox
     {
+        static readonly Interpreter interpreter = new Interpreter();
+        static bool hadError;
+        static bool hadRuntimeException;
+
         async static Task<int> Main(string[] args)
         {
             if (args.Length > 1)
@@ -23,6 +27,11 @@ namespace Lox
             if (hadError)
             {
                 return 65;
+            }            
+
+            if (hadRuntimeException)
+            {
+                return 70;
             }
 
             return 0;
@@ -59,7 +68,9 @@ namespace Lox
                 return;
             }
 
-            Console.Out.WriteLine(new AstPrinter().Print(expression));
+            interpreter.Interpret(expression!);
+
+            Console.Out.WriteLine(new AstPrinter().Print(expression!));
         }
 
         public static void Error(int line, string message) =>
@@ -77,7 +88,12 @@ namespace Lox
             }
         }
 
-        static bool hadError;
+        public static void RuntimeException(RuntimeException exception)
+        {
+            Console.Error.WriteLine($"{exception.Message}\n[line {exception.Token.Line}]");
+            hadRuntimeException = true;
+        }
+        
         static void Report(int line, string where, string message)
         {
             Console.Error.WriteLine($"[line {line}] Error{where}:{message}");

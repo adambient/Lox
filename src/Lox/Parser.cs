@@ -1,6 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Text.RegularExpressions;
-using static Lox.TokenTypeEnum;
+﻿using static Lox.TokenTypeEnum;
 
 namespace Lox
 {
