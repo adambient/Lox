@@ -8,21 +8,120 @@ namespace Lox
 
         int current = 0;
 
-        public Expr? Parse()
+        public List<Stmt> Parse()
         {
-            try
+            var statements = new List<Stmt>();
+            while (!IsAtEnd())
             {
-                return Expression();
+                var declaration = Declaration();
+                if (declaration != null)
+                {
+                    statements.Add(declaration);
+                }
             }
-            catch (ParseException)
-            {
-                return null;
-            }
+
+            return statements;
         }
 
         Expr Expression()
         {
-            return Equality();
+            return Assignment();
+        }
+
+        Stmt? Declaration()
+        {
+            try
+            {
+                if (Match(VAR))
+                {
+                    return VarDeclaration();
+                }
+
+                return Statement();
+            }
+            catch (ParseException)
+            {
+                Synchronize();
+                return null;
+            }
+        }
+
+        Stmt Statement()
+        {
+            if (Match(PRINT))
+            {
+                return PrintStatement();
+            }
+
+            if (Match(LEFT_BRACE))
+            {
+                return new Stmt.Block(Block());
+            }
+
+            return ExpressionStatement();
+        }
+
+        Stmt PrintStatement()
+        {
+            var value = Expression();
+            Consume(SEMICOLON, "Expect ';' after value.");
+            return new Stmt.Print(value);
+        }
+
+        Stmt VarDeclaration()
+        {
+            var name = Consume(IDENTIFIER, "Expect variable name.");
+
+            Expr? initializer = null;
+            if (Match(EQUAL))
+            {
+                initializer = Expression();
+            }
+
+            Consume(SEMICOLON, "Expect ';' after variable declaration.");
+            return new Stmt.Var(name, initializer);
+        }
+
+        Stmt ExpressionStatement()
+        {
+            var expr = Expression();
+            Consume(SEMICOLON, "Expect ';' after expression.");
+            return new Stmt.Expression(expr);
+        }
+
+        List<Stmt> Block()
+        {
+            var statements = new List<Stmt>();
+            while (!Check(RIGHT_BRACE) && !IsAtEnd())
+            {
+                var declaration = Declaration();
+                if (declaration != null)
+                {
+                    statements.Add(declaration);
+                }
+            }
+
+            Consume(RIGHT_BRACE, "Expect '}' after block.");
+            return statements;
+        }
+
+        Expr Assignment()
+        {
+            var expr = Equality();
+
+            if (Match(EQUAL))
+            {
+                var equals = Previous();
+                var value = Assignment();
+
+                if (expr is Expr.Variable variableExpr)
+                {
+                    var name = variableExpr.Name;
+                    return new Expr.Assign(name, value);
+                }
+            }
+
+            return expr;
         }
 
         Expr Equality()
@@ -137,6 +236,11 @@ namespace Lox
             if (Match(NUMBER, STRING))
             {
                 return new Expr.Literal(Previous().Literal);
+            }
+
+            if (Match(IDENTIFIER))
+            {
+                return new Expr.Variable(Previous());
             }
 
             if (Match(LEFT_PAREN))

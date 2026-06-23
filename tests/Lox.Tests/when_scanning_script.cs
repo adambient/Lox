@@ -5,8 +5,8 @@ namespace Lox.Tests
     [Subject(typeof(Scanner))]
     public class when_scanning_script
     {
-        static Scanner scanner;
-        static List<Token> tokens;
+        static Scanner scanner = null!;
+        static List<Token> tokens = null!;
 
         Establish context = () =>
             scanner = new Scanner(@"if (true) { }");

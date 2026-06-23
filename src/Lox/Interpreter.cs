@@ -2,21 +2,22 @@
 
 namespace Lox
 {
-    public class Interpreter : Expr.IVisitor<object?>
+    public class Interpreter(ConsoleWriter console) : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
     {
-        public string? Interpret(Expr expression)
+        Environment environment = new();
+
+        public void Interpret(List<Stmt> statements)
         {
             try
             {
-                var value = Evaluate(expression);
-                var stringValue = Stringify(value);
-                Console.Out.WriteLine(stringValue);
-                return stringValue;
+                foreach (var stmt in statements)
+                {
+                    Execute(stmt);
+                }
             }
             catch (RuntimeException exception)
             {
                 Lox.RuntimeException(exception);
-                return null;
             }
         }
 
@@ -38,6 +39,13 @@ namespace Lox
             }
 
             return value.ToString();
+        }
+
+        object? Expr.IVisitor<object?>.VisitAssignExpr(Expr.Assign expr)
+        {
+            var value = Evaluate(expr.Value);
+            environment.Assign(expr.Name, value);
+            return value;
         }
 
         object? Expr.IVisitor<object?>.VisitBinaryExpr(Expr.Binary expr)
@@ -91,7 +99,7 @@ namespace Lox
 
         object? Expr.IVisitor<object?>.VisitGroupingExpr(Expr.Grouping expr)
         {
-            return Evaluate(expr.Expression);
+            return Evaluate(expr.Expr);
         }
 
         object? Expr.IVisitor<object?>.VisitLiteralExpr(Expr.Literal expr)
@@ -116,9 +124,36 @@ namespace Lox
             return null;
         }
 
+        object? Expr.IVisitor<object?>.VisitVariableExpr(Expr.Variable expr)
+        {
+            return environment.Get(expr.Name);
+        }
+
         object? Evaluate(Expr expr)
         {
             return expr.Accept(this);
+        }
+
+        void Execute(Stmt stmt)
+        {
+            stmt.Accept(this);
+        }
+
+        void ExecuteBlock(List<Stmt> statements, Environment environment)
+        {
+            var previous = this.environment;
+            try
+            {
+                this.environment = environment;
+                foreach (var statement in statements)
+                {
+                    Execute(statement);
+                }
+            }
+            finally
+            {
+                this.environment = previous;
+            }
         }
 
         bool IsTruthy(object? value)
@@ -169,6 +204,37 @@ namespace Lox
             }
 
             throw new RuntimeException(op, "Operands must be numbers.");
+        }
+
+        object? Stmt.IVisitor<object?>.VisitBlockStmt(Stmt.Block stmt)
+        {
+            ExecuteBlock(stmt.Statements, new Environment(environment));
+            return null;
+        }
+
+        object? Stmt.IVisitor<object?>.VisitExpressionStmt(Stmt.Expression stmt)
+        {
+            Evaluate(stmt.Expr);
+            return null;
+        }
+
+        object? Stmt.IVisitor<object?>.VisitPrintStmt(Stmt.Print stmt)
+        {
+            var value = Evaluate(stmt.Expr);
+            console.WriteLineStdOut(Stringify(value));
+            return null;
+        }
+
+        object? Stmt.IVisitor<object?>.VisitVarStmt(Stmt.Var stmt)
+        {
+            object? value = null;
+            if (stmt.Init != null)
+            {
+                value = Evaluate(stmt.Init);
+            }
+
+            environment.Define(stmt.Name.Lexeme, value);
+            return null;
         }
     }
 }

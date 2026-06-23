@@ -5,17 +5,24 @@ namespace Lox
     {
         public interface IVisitor<TOut>
         {
+            TOut VisitAssignExpr(Assign expr);
             TOut VisitBinaryExpr(Binary expr);
             TOut VisitGroupingExpr(Grouping expr);
             TOut VisitLiteralExpr(Literal expr);
             TOut VisitUnaryExpr(Unary expr);
+            TOut VisitVariableExpr(Variable expr);
+        }
+        public record Assign(Token Name, Expr Value) : Expr
+        {
+            public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
+                visitor.VisitAssignExpr(this);
         }
         public record Binary(Expr Left, Token Operator, Expr Right) : Expr
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitBinaryExpr(this);
         }
-        public record Grouping(Expr Expression) : Expr
+        public record Grouping(Expr Expr) : Expr
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitGroupingExpr(this);
@@ -29,6 +36,11 @@ namespace Lox
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitUnaryExpr(this);
+        }
+        public record Variable(Token Name) : Expr
+        {
+            public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
+                visitor.VisitVariableExpr(this);
         }
 
         public abstract TOut Accept<TOut>(IVisitor<TOut> visitor);

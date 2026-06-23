@@ -16,10 +16,19 @@ namespace Lox.GenerateAst
             }
 
             await DefineAstAsync(outputDir, "Expr", [
+                "Assign   : Token Name, Expr Value",
                 "Binary   : Expr Left, Token Operator, Expr Right",
-                "Grouping : Expr Expression",
+                "Grouping : Expr Expr",
                 "Literal  : object? Value",
-                "Unary    : Token Operator, Expr Right"
+                "Unary    : Token Operator, Expr Right",
+                "Variable : Token Name"
+                ]);
+
+            await DefineAstAsync(outputDir, "Stmt", [
+                "Block      : List<Stmt> Statements",
+                "Expression : Expr Expr",
+                "Print      : Expr Expr",
+                "Var        : Token Name, Expr? Init"
                 ]);
 
             return 0;

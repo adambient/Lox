@@ -5,8 +5,8 @@ namespace Lox.Tests
     [Subject(typeof(AstPrinter))]
     public class when_printing_ast
     {
-        static Expr expression;
-        static AstPrinter printer;
+        static Expr expression = null!;
+        static AstPrinter printer = null!;
         static string? output;
 
         Establish context = () =>

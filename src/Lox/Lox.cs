@@ -4,15 +4,22 @@ namespace Lox
 {
     internal class Lox
     {
-        static readonly Interpreter interpreter = new Interpreter();
+        static readonly ConsoleWriter console;
+        static readonly Interpreter interpreter;
         static bool hadError;
         static bool hadRuntimeException;
+
+        static Lox()
+        {
+            console = new ConsoleWriter();
+            interpreter = new Interpreter(console);
+        }
 
         async static Task<int> Main(string[] args)
         {
             if (args.Length > 1)
             {
-                Console.WriteLine("Usage: jlox [script]"); // TODO - dotnet equiv
+                console.WriteLineStdOut("Usage: jlox [script]"); // TODO - dotnet equiv
                 return 64;
             }
             else if (args.Length == 1)
@@ -44,7 +51,7 @@ namespace Lox
         {
             while(true)
             {
-                Console.Out.Write("> ");
+                console.WriteStdOut("> ");
                 var line = Console.ReadLine();
                 if (string.IsNullOrEmpty(line))
                 {
@@ -60,7 +67,7 @@ namespace Lox
             var scanner = new Scanner(source);
             var tokens = scanner.ScanTokens();
             var parser = new Parser(tokens);
-            var expression = parser.Parse();
+            var statements = parser.Parse();
 
             // stop if there was a syntax error
             if (hadError)
@@ -68,9 +75,7 @@ namespace Lox
                 return;
             }
 
-            interpreter.Interpret(expression!);
-
-            Console.Out.WriteLine(new AstPrinter().Print(expression!));
+            interpreter.Interpret(statements);
         }
 
         public static void Error(int line, string message) =>
@@ -90,13 +95,13 @@ namespace Lox
 
         public static void RuntimeException(RuntimeException exception)
         {
-            Console.Error.WriteLine($"{exception.Message}\n[line {exception.Token.Line}]");
+            console.WriteLineStdError($"{exception.Message}\n[line {exception.Token.Line}]");
             hadRuntimeException = true;
         }
         
         static void Report(int line, string where, string message)
         {
-            Console.Error.WriteLine($"[line {line}] Error{where}:{message}");
+            console.WriteLineStdError($"[line {line}] Error{where}:{message}");
             hadError = true;
         }
     }

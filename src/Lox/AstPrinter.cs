@@ -7,17 +7,23 @@ namespace Lox
         public string Print(Expr expr) =>
             expr.Accept(this);
 
+        string Expr.IVisitor<string>.VisitAssignExpr(Expr.Assign expr) =>
+            Parenthisize(expr.Name.Lexeme, expr.Value);
+
         string Expr.IVisitor<string>.VisitBinaryExpr(Expr.Binary expr) =>
             Parenthisize(expr.Operator.Lexeme, expr.Left, expr.Right);
 
         string Expr.IVisitor<string>.VisitGroupingExpr(Expr.Grouping expr) =>
-            Parenthisize("group", expr.Expression);
+            Parenthisize("group", expr.Expr);
 
         string Expr.IVisitor<string>.VisitLiteralExpr(Expr.Literal expr) =>
             expr.Value?.ToString() ?? "nil";
 
         string Expr.IVisitor<string>.VisitUnaryExpr(Expr.Unary expr) =>
             Parenthisize(expr.Operator.Lexeme, expr.Right);
+
+        string Expr.IVisitor<string>.VisitVariableExpr(Expr.Variable expr) =>
+            expr.Name?.ToString() ?? "nil";
 
         string Parenthisize(string name, params Expr[] exprs)
         {
@@ -31,5 +37,7 @@ namespace Lox
             sb.Append(')');
             return sb.ToString();
         }
+
+        
     }
 }
