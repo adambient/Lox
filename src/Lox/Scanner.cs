@@ -2,7 +2,7 @@
 
 namespace Lox
 {
-    public class Scanner(string source)
+    public class Scanner(string source, IErrorHandler error)
     {
         int start = 0;
         int current = 0;
@@ -126,7 +126,7 @@ namespace Lox
                     }
                     else
                     {
-                        Lox.Error(line, "Unexpected character.");
+                        error.Error(line, "Unexpected character.");
                     }
                     break;
             }
@@ -175,7 +175,7 @@ namespace Lox
 
             if (IsAtEnd())
             {
-                Lox.Error(line, "Unterminated string.");
+                error.Error(line, "Unterminated string.");
                 return;
             }
 

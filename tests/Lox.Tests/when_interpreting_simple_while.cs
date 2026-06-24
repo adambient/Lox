@@ -3,7 +3,7 @@
 namespace Lox.Tests
 {
     [Subject(typeof(Interpreter))]
-    public class when_interpreting_simple_block
+    public class when_interpreting_simple_while
     {
         static TestConsoleWriter console = new();
         static Lox lox = new Lox(console);
@@ -14,10 +14,11 @@ namespace Lox.Tests
         {
             source = @"
 var a = 1;
+while (a < 3)
 {
-  var a = a + 2;
-  print a;
+  a = a + 1;
 }
+print a;
 ";
         };
 

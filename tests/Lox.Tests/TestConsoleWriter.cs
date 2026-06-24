@@ -6,9 +6,9 @@ namespace Lox.Tests
     {
         StringBuilder sbOut = new();
         StringBuilder sbError = new();
-        public override void WriteStdOut(string? value) => sbOut.Append(value);
-        public override void WriteLineStdOut(string? value) => sbOut.AppendLine(value);
-        public override void WriteLineStdError(string? value) => sbError.Append(value);
+        public override void StdOut(string? value) => sbOut.Append(value);
+        public override void StdOutLn(string? value) => sbOut.AppendLine(value);
+        public override void StdErrorLn(string? value) => sbError.Append(value);
         public string GetStdOut() => sbOut.ToString();
         public string GetStdErr() => sbError.ToString();
     }

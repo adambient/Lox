@@ -6,22 +6,18 @@ namespace Lox.Tests
     public class when_interpreting_simple_expression
     {
         static TestConsoleWriter console = new();
-        static Interpreter interpreter = null!;
-        static List<Stmt> statements = null!;
+        static Lox lox = new Lox(console);
+        static string? source;
         static string? stringValue;
 
         Establish context = () =>
         {
-            var scanner = new Scanner(@"print 6 / (3 - 1);");
-            var tokens = scanner.ScanTokens();
-            var parser = new Parser(tokens);
-            statements = parser.Parse();
-            interpreter = new Interpreter(console);
+            source = @"print 6 / (3 - 1);";
         };
 
         Because of = () =>
         {
-            interpreter.Interpret(statements);
+            lox.Run(source);
             stringValue = console.GetStdOut();
         };
 

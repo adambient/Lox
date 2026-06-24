@@ -1,8 +1,9 @@
 ﻿using static Lox.TokenTypeEnum;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Lox
 {
-    public class Parser(List<Token> tokens)
+    public class Parser(List<Token> tokens, IErrorHandler error)
     {
         class ParseException : ApplicationException { }
 
@@ -48,9 +49,24 @@ namespace Lox
 
         Stmt Statement()
         {
+            if (Match(FOR))
+            {
+                return ForStatement();
+            }
+
+            if (Match(IF))
+            {
+                return IfStatement();
+            }
+
             if (Match(PRINT))
             {
                 return PrintStatement();
+            }
+
+            if (Match(WHILE))
+            {
+                return WhileStatement();
             }
 
             if (Match(LEFT_BRACE))
@@ -59,6 +75,77 @@ namespace Lox
             }
 
             return ExpressionStatement();
+        }
+
+        Stmt ForStatement()
+        {
+            Consume(LEFT_PAREN, "Expect '(' after 'for'.");
+
+            Stmt? initializer;
+            if (Match(SEMICOLON))
+            {
+                initializer = null;
+            }
+            else if (Match(VAR))
+            {
+                initializer = VarDeclaration();
+            }
+            else
+            {
+                initializer = ExpressionStatement();
+            }
+
+            Expr? condition = null;
+            if (!Check(SEMICOLON))
+            {
+                condition = Expression();
+            }
+
+            Consume(SEMICOLON, "Expect ';' after loop condition.");
+
+            Expr? increment = null;
+            if (!Check(RIGHT_PAREN))
+            {
+                increment = Expression();
+            }
+
+            Consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+            var body = Statement();
+
+            if (increment != null)
+            {
+                body = new Stmt.Block([body, new Stmt.Expression(increment)]);
+            }
+
+            if (condition == null)
+            {
+                condition = new Expr.Literal(true);
+            }
+
+            body = new Stmt.While(condition, body);
+
+            if (initializer != null)
+            {
+                body = new Stmt.Block([initializer, body]);
+            }
+
+            return body;
+        }
+
+        Stmt IfStatement()
+        {
+            Consume(LEFT_PAREN, "Expect '(' after 'if'.");
+            var condition = Expression();
+            Consume(RIGHT_PAREN, "Expect ')' after if condition.");
+
+            var thenBranch = Statement();
+            Stmt? elseBranch = null;
+            if (Match(ELSE))
+            {
+                elseBranch = Statement();
+            }
+
+            return new Stmt.If(condition, thenBranch, elseBranch);
         }
 
         Stmt PrintStatement()
@@ -80,6 +167,16 @@ namespace Lox
 
             Consume(SEMICOLON, "Expect ';' after variable declaration.");
             return new Stmt.Var(name, initializer);
+        }
+
+        Stmt WhileStatement()
+        {
+            Consume(LEFT_PAREN, "Expect '(' after 'while'.");
+            var condition = Expression();
+            Consume(RIGHT_PAREN, "Expect ')' after condition.");
+            var body = Statement();
+
+            return new Stmt.While(condition, body);
         }
 
         Stmt ExpressionStatement()
@@ -107,7 +204,7 @@ namespace Lox
 
         Expr Assignment()
         {
-            var expr = Equality();
+            var expr = Or();
 
             if (Match(EQUAL))
             {
@@ -119,6 +216,34 @@ namespace Lox
                     var name = variableExpr.Name;
                     return new Expr.Assign(name, value);
                 }
+            }
+
+            return expr;
+        }
+
+        Expr Or()
+        {
+            var expr = And();
+
+            while (Match(OR))
+            {
+                var op = Previous();
+                var right = And();
+                expr = new Expr.Logical(expr, op, right);
+            }
+
+            return expr;
+        }
+
+        Expr And()
+        {
+            var expr = Equality();
+
+            while (Match(AND))
+            {
+                var op = Previous();
+                var right = Equality();
+                expr = new Expr.Logical(expr, op, right);
             }
 
             return expr;
@@ -265,7 +390,7 @@ namespace Lox
 
         ParseException Error(Token token, string message)
         {
-            Lox.Error(token, message);
+            error.Error(token, message);
             return new ParseException();
         }
 
@@ -292,9 +417,9 @@ namespace Lox
                     case RETURN:
                         return;
                 }
-            }
 
-            Advance();
+                Advance();
+            }            
         }
 
         Token Advance()

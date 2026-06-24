@@ -2,7 +2,7 @@
 
 namespace Lox
 {
-    public class Interpreter(ConsoleWriter console) : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
+    public class Interpreter(ConsoleWriter console, IErrorHandler error) : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
     {
         Environment environment = new();
 
@@ -17,7 +17,7 @@ namespace Lox
             }
             catch (RuntimeException exception)
             {
-                Lox.RuntimeException(exception);
+                error.RuntimeException(exception);
             }
         }
 
@@ -105,6 +105,28 @@ namespace Lox
         object? Expr.IVisitor<object?>.VisitLiteralExpr(Expr.Literal expr)
         {
             return expr.Value;
+        }
+
+        object? Expr.IVisitor<object?>.VisitLogicalExpr(Expr.Logical expr)
+        {
+            var left = Evaluate(expr.Left);
+
+            if (expr.Operator.Type == OR)
+            {
+                if (IsTruthy(left))
+                {
+                    return left;
+                }
+            }
+            else
+            {
+                if (!IsTruthy(left))
+                {
+                    return left;
+                }
+            }
+
+            return Evaluate(expr.Right);
         }
 
         object? Expr.IVisitor<object?>.VisitUnaryExpr(Expr.Unary expr)
@@ -218,10 +240,23 @@ namespace Lox
             return null;
         }
 
+        object? Stmt.IVisitor<object?>.VisitIfStmt(Stmt.If stmt)
+        {
+            if (IsTruthy(Evaluate(stmt.Condition)))
+            {
+                Execute(stmt.ThenBranch);
+            }
+            else if (stmt.ElseBranch != null)
+            {
+                Execute(stmt.ElseBranch);
+            }
+            return null;
+        }
+
         object? Stmt.IVisitor<object?>.VisitPrintStmt(Stmt.Print stmt)
         {
             var value = Evaluate(stmt.Expr);
-            console.WriteLineStdOut(Stringify(value));
+            console.StdOutLn(Stringify(value));
             return null;
         }
 
@@ -234,6 +269,15 @@ namespace Lox
             }
 
             environment.Define(stmt.Name.Lexeme, value);
+            return null;
+        }
+
+        object? Stmt.IVisitor<object?>.VisitWhileStmt(Stmt.While stmt)
+        {
+            while (IsTruthy(Evaluate(stmt.Condition)))
+            {
+                Execute(stmt.Body);
+            }
             return null;
         }
     }

@@ -20,6 +20,7 @@ namespace Lox.GenerateAst
                 "Binary   : Expr Left, Token Operator, Expr Right",
                 "Grouping : Expr Expr",
                 "Literal  : object? Value",
+                "Logical  : Expr Left, Token Operator, Expr Right",
                 "Unary    : Token Operator, Expr Right",
                 "Variable : Token Name"
                 ]);
@@ -27,8 +28,10 @@ namespace Lox.GenerateAst
             await DefineAstAsync(outputDir, "Stmt", [
                 "Block      : List<Stmt> Statements",
                 "Expression : Expr Expr",
+                "If         : Expr Condition, Stmt ThenBranch, Stmt? ElseBranch",
                 "Print      : Expr Expr",
-                "Var        : Token Name, Expr? Init"
+                "Var        : Token Name, Expr? Init",
+                "While      : Expr Condition, Stmt Body"
                 ]);
 
             return 0;

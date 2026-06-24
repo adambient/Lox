@@ -3,7 +3,7 @@
 namespace Lox.Tests
 {
     [Subject(typeof(Interpreter))]
-    public class when_interpreting_simple_block
+    public class when_interpreting_invalid_if
     {
         static TestConsoleWriter console = new();
         static Lox lox = new Lox(console);
@@ -14,9 +14,13 @@ namespace Lox.Tests
         {
             source = @"
 var a = 1;
+if (a == 3)
 {
-  var a = a + 2;
-  print a;
+  print ""fizz""
+}
+else
+{
+  print ""buzz"";
 }
 ";
         };
@@ -27,7 +31,13 @@ var a = 1;
             stringValue = console.GetStdOut();
         };
 
-        It should_return_correct_result = () =>
-            stringValue.ShouldEqual("3\r\n"); // console adds newline
+        It should_not_return_correct_result = () =>
+            stringValue.ShouldEqual(string.Empty);
+
+        It should_return_error = () =>
+        {
+            var error = console.GetStdErr();
+            error.ShouldEqual("[line 6] Error at '}':Expect ';' after value.");
+        };
     }
 }

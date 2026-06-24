@@ -19,6 +19,9 @@ namespace Lox
         string Expr.IVisitor<string>.VisitLiteralExpr(Expr.Literal expr) =>
             expr.Value?.ToString() ?? "nil";
 
+        string Expr.IVisitor<string>.VisitLogicalExpr(Expr.Logical expr) =>
+            Parenthisize(expr.Operator.Lexeme, expr.Left, expr.Right);
+
         string Expr.IVisitor<string>.VisitUnaryExpr(Expr.Unary expr) =>
             Parenthisize(expr.Operator.Lexeme, expr.Right);
 

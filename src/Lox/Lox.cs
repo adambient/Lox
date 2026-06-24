@@ -2,38 +2,34 @@
 
 namespace Lox
 {
-    internal class Lox
+    public class Lox : IErrorHandler
     {
-        static readonly ConsoleWriter console;
-        static readonly Interpreter interpreter;
-        static bool hadError;
-        static bool hadRuntimeException;
+        readonly ConsoleWriter console;
+        readonly Interpreter interpreter;
+        bool hadError;
+        bool hadRuntimeException;
 
-        static Lox()
+        public Lox(ConsoleWriter console)
         {
-            console = new ConsoleWriter();
-            interpreter = new Interpreter(console);
+            this.console = console;
+            interpreter = new Interpreter(console, this);
         }
 
-        async static Task<int> Main(string[] args)
+        public int Run(string source)
         {
-            if (args.Length > 1)
+            var scanner = new Scanner(source, this);
+            var tokens = scanner.ScanTokens();
+            var parser = new Parser(tokens, this);
+            var statements = parser.Parse();
+            
+            if (hadError)
             {
-                console.WriteLineStdOut("Usage: jlox [script]"); // TODO - dotnet equiv
-                return 64;
-            }
-            else if (args.Length == 1)
-            {
-                await RunFileAsync(args[0], default);
+                // stop if there was a syntax error
+                return 65;
             }
             else
             {
-                RunPrompt();
-            }
-
-            if (hadError)
-            {
-                return 65;
+                interpreter.Interpret(statements);
             }            
 
             if (hadRuntimeException)
@@ -44,44 +40,10 @@ namespace Lox
             return 0;
         }
 
-        static async Task RunFileAsync(string path, CancellationToken cancellationToken) =>
-            Run(await File.ReadAllTextAsync(path, Encoding.Default, cancellationToken));
-
-        static void RunPrompt()
-        {
-            while(true)
-            {
-                console.WriteStdOut("> ");
-                var line = Console.ReadLine();
-                if (string.IsNullOrEmpty(line))
-                {
-                    break;
-                }
-
-                Run(line);
-            }
-        }
-
-        static void Run(string source)
-        {
-            var scanner = new Scanner(source);
-            var tokens = scanner.ScanTokens();
-            var parser = new Parser(tokens);
-            var statements = parser.Parse();
-
-            // stop if there was a syntax error
-            if (hadError)
-            {
-                return;
-            }
-
-            interpreter.Interpret(statements);
-        }
-
-        public static void Error(int line, string message) =>
+        public void Error(int line, string message) =>
             Report(line, string.Empty, message);
 
-        public static void Error(Token token, string message)
+        public void Error(Token token, string message)
         {
             if (token.Type == TokenTypeEnum.EOF)
             {
@@ -93,15 +55,15 @@ namespace Lox
             }
         }
 
-        public static void RuntimeException(RuntimeException exception)
+        public void RuntimeException(RuntimeException exception)
         {
-            console.WriteLineStdError($"{exception.Message}\n[line {exception.Token.Line}]");
+            console.StdErrorLn($"{exception.Message}\n[line {exception.Token.Line}]");
             hadRuntimeException = true;
         }
         
-        static void Report(int line, string where, string message)
+        void Report(int line, string where, string message)
         {
-            console.WriteLineStdError($"[line {line}] Error{where}:{message}");
+            console.StdErrorLn($"[line {line}] Error{where}:{message}");
             hadError = true;
         }
     }
