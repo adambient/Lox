@@ -8,10 +8,8 @@ namespace Lox.Tests
         static TestConsoleWriter console = new();
         static Lox lox = new Lox(console);
         static string? source;
-        static string? stringValue;
 
         Establish context = () =>
-        {
             source = @"
 var a = 1;
 if (a == 3)
@@ -23,15 +21,11 @@ else
   print ""buzz"";
 }
 ";
-        };
 
         Because of = () =>
-        {
             lox.Run(source);
-            stringValue = console.GetStdOut();
-        };
 
         It should_return_correct_result = () =>
-            stringValue.ShouldEqual("buzz\r\n"); // console adds newline
+            console.GetStdOut().ShouldEqual("buzz\r\n"); // console adds newline
     }
 }

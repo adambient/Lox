@@ -8,10 +8,8 @@ namespace Lox.Tests
         static TestConsoleWriter console = new();
         static Lox lox = new Lox(console);
         static string? source;
-        static string? stringValue;
 
         Establish context = () =>
-        {
             source = @"
 var a = 0;
 var temp;
@@ -22,16 +20,12 @@ for (var b = 1; a < 10000; b = temp + b) {
   a = b;
 }
 ";
-        };
 
         Because of = () =>
-        {
             lox.Run(source);
-            stringValue = console.GetStdOut();
-        };
 
         It should_return_correct_result = () =>
-            stringValue.ShouldEqual(@"0
+            console.GetStdOut().ShouldEqual(@"0
 1
 1
 2

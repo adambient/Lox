@@ -8,10 +8,8 @@ namespace Lox.Tests
         static TestConsoleWriter console = new();
         static Lox lox = new Lox(console);
         static string? source;
-        static string? stringValue;
 
         Establish context = () =>
-        {
             source = @"
 fun makeCounter() {
   var i = 0;
@@ -27,16 +25,12 @@ var counter = makeCounter();
 counter(); // ""1"".
 counter(); // ""2"".
 ";
-        };
 
         Because of = () =>
-        {
             lox.Run(source);
-            stringValue = console.GetStdOut();
-        };
 
         It should_return_correct_result = () =>
-            stringValue.ShouldEqual(@"1
+            console.GetStdOut().ShouldEqual(@"1
 2
 "); // console adds newline
     }
