@@ -1,4 +1,5 @@
-﻿using static Lox.TokenTypeEnum;
+﻿using System.Linq.Expressions;
+using static Lox.TokenTypeEnum;
 
 namespace Lox
 {
@@ -8,6 +9,7 @@ namespace Lox
         readonly IErrorHandler error;
         public Environment Globals { get; }
         Environment environment;
+        readonly Dictionary<Expr, int> locals = new();
 
         public Interpreter(ConsoleWriter console, IErrorHandler error)
         {
@@ -57,7 +59,16 @@ namespace Lox
         object? Expr.IVisitor<object?>.VisitAssignExpr(Expr.Assign expr)
         {
             var value = Evaluate(expr.Value);
-            environment.Assign(expr.Name, value);
+
+            if (locals.ContainsKey(expr))
+            {
+                environment.AssignAt(locals[expr], expr.Name, value);
+            }
+            else
+            {
+                Globals.Assign(expr.Name, value);
+            }
+
             return value;
         }
 
@@ -184,7 +195,19 @@ namespace Lox
 
         object? Expr.IVisitor<object?>.VisitVariableExpr(Expr.Variable expr)
         {
-            return environment.Get(expr.Name);
+            return LookUpVariable(expr.Name, expr);
+        }
+
+        object? LookUpVariable(Token name, Expr expr)
+        {
+            if (locals.ContainsKey(expr))
+            {
+                return environment.GetAt(locals[expr], name.Lexeme);
+            }
+            else
+            {
+                return Globals.Get(name);
+            }
         }
 
         object? Evaluate(Expr expr)
@@ -195,6 +218,11 @@ namespace Lox
         void Execute(Stmt stmt)
         {
             stmt.Accept(this);
+        }
+
+        public void Resolve(Expr expr, int depth)
+        {
+            locals[expr] = depth;
         }
 
         public void ExecuteBlock(List<Stmt> statements, Environment environment)

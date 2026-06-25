@@ -27,10 +27,17 @@ namespace Lox
                 // stop if there was a syntax error
                 return 65;
             }
-            else
+            
+            var resolver = new Resolver(interpreter, this);
+            resolver.Resolve(statements);
+
+            if (hadError)
             {
-                interpreter.Interpret(statements);
-            }            
+                // stop if there was a resolution error
+                return 65;
+            }
+
+            interpreter.Interpret(statements);
 
             if (hadRuntimeException)
             {

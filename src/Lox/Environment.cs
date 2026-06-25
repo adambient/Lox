@@ -2,15 +2,10 @@
 {
     public class Environment
     {
-        readonly Environment? enclosing;
+        readonly Environment? enclosing = null;
         readonly Dictionary<string, object?> values = new();
 
-        public Environment()
-        {
-            enclosing = null;
-        }
-
-        public Environment(Environment enclosing)
+        public Environment(Environment? enclosing = null)
         {
             this.enclosing = enclosing;
         }
@@ -50,6 +45,27 @@
         public void Define(string name, object? value)
         {
             values[name] = value;
+        }
+
+        public object? GetAt(int distance, string name)
+        {
+            return Ancestor(distance).values[name];
+        }
+
+        public void AssignAt(int distance, Token name, object? value)
+        {
+            Ancestor(distance).values[name.Lexeme] = value;
+        }
+
+        Environment Ancestor(int distance)
+        {
+            var environment = this;
+            for (int i = 0; i < distance; i++)
+            {
+                environment = environment.enclosing!;
+            }
+
+            return environment;
         }
     }
 }

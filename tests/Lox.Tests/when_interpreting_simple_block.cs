@@ -13,15 +13,18 @@ namespace Lox.Tests
             source = @"
 var a = 1;
 {
-  var a = a + 2;
+  var a = 3;
   print a;
 }
+print a;
 ";
 
         Because of = () =>
             lox.Run(source);
 
         It should_return_correct_result = () =>
-            console.GetStdOut().ShouldEqual("3\r\n"); // console adds newline
+            console.GetStdOut().ShouldEqual(@"3
+1
+"); // console adds newline
     }
 }
