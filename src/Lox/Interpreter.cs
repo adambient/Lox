@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using static Lox.TokenTypeEnum;
+﻿using static Lox.TokenTypeEnum;
 
 namespace Lox
 {
@@ -50,6 +49,7 @@ namespace Lox
                 {
                     text = text.Substring(0, text.Length - 2);
                 }
+
                 return text;
             }
 
@@ -59,7 +59,6 @@ namespace Lox
         object? Expr.IVisitor<object?>.VisitAssignExpr(Expr.Assign expr)
         {
             var value = Evaluate(expr.Value);
-
             if (locals.ContainsKey(expr))
             {
                 environment.AssignAt(locals[expr], expr.Name, value);
@@ -76,7 +75,6 @@ namespace Lox
         {
             var left = Evaluate(expr.Left);
             var right = Evaluate(expr.Right);
-
             switch (expr.Operator.Type)
             {
                 case GREATER:
@@ -122,15 +120,14 @@ namespace Lox
         }
 
         object? Expr.IVisitor<object?>.VisitCallExpr(Expr.Call expr)
-        {
-            var callee = Evaluate(expr.Callee);
-
+        {            
             var arguments = new List<object?>();
             foreach (var argument in expr.Arguments)
             {
                 arguments.Add(Evaluate(argument));
             }
 
+            var callee = Evaluate(expr.Callee);
             if (callee is not ILoxCallable function)
             {
                 throw new RuntimeException(expr.Paren, "Can only call functions and classes.");
@@ -144,20 +141,15 @@ namespace Lox
             return function.Call(this, arguments);
         }
 
-        object? Expr.IVisitor<object?>.VisitGroupingExpr(Expr.Grouping expr)
-        {
-            return Evaluate(expr.Expr);
-        }
+        object? Expr.IVisitor<object?>.VisitGroupingExpr(Expr.Grouping expr) =>
+            Evaluate(expr.Expr);
 
-        object? Expr.IVisitor<object?>.VisitLiteralExpr(Expr.Literal expr)
-        {
-            return expr.Value;
-        }
+        object? Expr.IVisitor<object?>.VisitLiteralExpr(Expr.Literal expr) =>
+            expr.Value;
 
         object? Expr.IVisitor<object?>.VisitLogicalExpr(Expr.Logical expr)
         {
             var left = Evaluate(expr.Left);
-
             if (expr.Operator.Type == OR)
             {
                 if (IsTruthy(left))
@@ -179,7 +171,6 @@ namespace Lox
         object? Expr.IVisitor<object?>.VisitUnaryExpr(Expr.Unary expr)
         {
             var right = Evaluate(expr.Right);
-
             switch (expr.Operator.Type)
             {
                 case BANG:
@@ -193,10 +184,8 @@ namespace Lox
             return null;
         }
 
-        object? Expr.IVisitor<object?>.VisitVariableExpr(Expr.Variable expr)
-        {
-            return LookUpVariable(expr.Name, expr);
-        }
+        object? Expr.IVisitor<object?>.VisitVariableExpr(Expr.Variable expr) =>
+            LookUpVariable(expr.Name, expr);
 
         object? LookUpVariable(Token name, Expr expr)
         {
@@ -210,20 +199,14 @@ namespace Lox
             }
         }
 
-        object? Evaluate(Expr expr)
-        {
-            return expr.Accept(this);
-        }
+        object? Evaluate(Expr expr) =>
+            expr.Accept(this);
 
-        void Execute(Stmt stmt)
-        {
+        void Execute(Stmt stmt) =>
             stmt.Accept(this);
-        }
 
-        public void Resolve(Expr expr, int depth)
-        {
+        public void Resolve(Expr expr, int depth) =>
             locals[expr] = depth;
-        }
 
         public void ExecuteBlock(List<Stmt> statements, Environment environment)
         {
@@ -321,6 +304,7 @@ namespace Lox
             {
                 Execute(stmt.ElseBranch);
             }
+
             return null;
         }
 
@@ -360,6 +344,7 @@ namespace Lox
             {
                 Execute(stmt.Body);
             }
+
             return null;
         }
     }

@@ -57,27 +57,23 @@ namespace Lox
         {
             var enclosingFunction = currentFunction;
             currentFunction = type;
-
             BeginScope();
             foreach (var param in function.Params)
             {
                 Declare(param);
                 Define(param);
             }
+
             Resolve(function.Body);
             EndScope();
             currentFunction = enclosingFunction;
         }
 
-        void BeginScope()
-        {
+        void BeginScope() =>
             scopes.Push(new Dictionary<string, bool>());
-        }
 
-        void EndScope()
-        {
+        void EndScope() =>
             scopes.Pop();
-        }
 
         object? Expr.IVisitor<object?>.VisitCallExpr(Expr.Call expr)
         {
@@ -86,6 +82,7 @@ namespace Lox
             {
                 Resolve(argument);
             }
+
             return null;
         }
 
@@ -117,6 +114,7 @@ namespace Lox
             {
                 Resolve(stmt.ElseBranch);
             }
+
             return null;
         }
 
@@ -149,6 +147,7 @@ namespace Lox
             {
                 Resolve(stmt.Value);
             }
+
             return null;
         }
 
@@ -189,6 +188,7 @@ namespace Lox
             {
                 Resolve(stmt.Init);
             }
+
             Define(stmt.Name);
             return null;
         }

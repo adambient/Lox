@@ -20,8 +20,7 @@ namespace Lox
             var scanner = new Scanner(source, this);
             var tokens = scanner.ScanTokens();
             var parser = new Parser(tokens, this);
-            var statements = parser.Parse();
-            
+            var statements = parser.Parse();            
             if (hadError)
             {
                 // stop if there was a syntax error
@@ -30,7 +29,6 @@ namespace Lox
             
             var resolver = new Resolver(interpreter, this);
             resolver.Resolve(statements);
-
             if (hadError)
             {
                 // stop if there was a resolution error
@@ -38,7 +36,6 @@ namespace Lox
             }
 
             interpreter.Interpret(statements);
-
             if (hadRuntimeException)
             {
                 return 70;

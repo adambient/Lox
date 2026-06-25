@@ -90,7 +90,6 @@ namespace Lox
         Stmt ForStatement()
         {
             Consume(LEFT_PAREN, "Expect '(' after 'for'.");
-
             Stmt? initializer;
             if (Match(SEMICOLON))
             {
@@ -112,7 +111,6 @@ namespace Lox
             }
 
             Consume(SEMICOLON, "Expect ';' after loop condition.");
-
             Expr? increment = null;
             if (!Check(RIGHT_PAREN))
             {
@@ -121,7 +119,6 @@ namespace Lox
 
             Consume(RIGHT_PAREN, "Expect ')' after for clauses.");
             var body = Statement();
-
             if (increment != null)
             {
                 body = new Stmt.Block([body, new Stmt.Expression(increment)]);
@@ -133,7 +130,6 @@ namespace Lox
             }
 
             body = new Stmt.While(condition, body);
-
             if (initializer != null)
             {
                 body = new Stmt.Block([initializer, body]);
@@ -147,7 +143,6 @@ namespace Lox
             Consume(LEFT_PAREN, "Expect '(' after 'if'.");
             var condition = Expression();
             Consume(RIGHT_PAREN, "Expect ')' after if condition.");
-
             var thenBranch = Statement();
             Stmt? elseBranch = null;
             if (Match(ELSE))
@@ -181,7 +176,6 @@ namespace Lox
         Stmt VarDeclaration()
         {
             var name = Consume(IDENTIFIER, "Expect variable name.");
-
             Expr? initializer = null;
             if (Match(EQUAL))
             {
@@ -252,12 +246,10 @@ namespace Lox
         Expr Assignment()
         {
             var expr = Or();
-
             if (Match(EQUAL))
             {
                 var equals = Previous();
                 var value = Assignment();
-
                 if (expr is Expr.Variable variableExpr)
                 {
                     var name = variableExpr.Name;
@@ -271,7 +263,6 @@ namespace Lox
         Expr Or()
         {
             var expr = And();
-
             while (Match(OR))
             {
                 var op = Previous();
@@ -285,7 +276,6 @@ namespace Lox
         Expr And()
         {
             var expr = Equality();
-
             while (Match(AND))
             {
                 var op = Previous();
@@ -299,7 +289,6 @@ namespace Lox
         Expr Equality()
         {
             var expr = Comparison();
-
             while (Match(BANG_EQUAL, EQUAL_EQUAL))
             {
                 var op = Previous();
@@ -337,7 +326,6 @@ namespace Lox
         Expr Comparison()
         {
             var expr = Term();
-
             while (Match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL))
             {
                 var op = Previous();
@@ -351,7 +339,6 @@ namespace Lox
         Expr Term()
         {
             var expr = Factor();
-
             while (Match(MINUS, PLUS))
             {
                 var op = Previous();
@@ -365,7 +352,6 @@ namespace Lox
         Expr Factor()
         {
             var expr = Unary();
-
             while (Match(SLASH, STAR))
             {
                 var op = Previous();
@@ -399,19 +385,18 @@ namespace Lox
                     {
                         Error(Peek(), "Can't have more than 255 arguments.");
                     }
+
                     arguments.Add(Expression());
                 } while (Match(COMMA));
             }
 
             var paren = Consume(RIGHT_PAREN, "Expect ')' after arguments.");
-
             return new Expr.Call(callee, paren, arguments);
         }
 
         Expr Call()
         {
             var expr = Primary();
-
             while (true)
             {
                 if (Match(LEFT_PAREN))
@@ -483,7 +468,6 @@ namespace Lox
         void Synchronize()
         {
             Advance();
-
             while (!IsAtEnd())
             {
                 if (Previous().Type == SEMICOLON)

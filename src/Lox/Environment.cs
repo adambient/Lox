@@ -5,10 +5,8 @@
         readonly Environment? enclosing = null;
         readonly Dictionary<string, object?> values = new();
 
-        public Environment(Environment? enclosing = null)
-        {
+        public Environment(Environment? enclosing = null) =>
             this.enclosing = enclosing;
-        }
 
         public object? Get(Token name)
         {
@@ -42,20 +40,14 @@
             throw new RuntimeException(name, $"Undefined variable '{name.Lexeme}'.");
         }
 
-        public void Define(string name, object? value)
-        {
+        public void Define(string name, object? value) =>
             values[name] = value;
-        }
 
-        public object? GetAt(int distance, string name)
-        {
-            return Ancestor(distance).values[name];
-        }
+        public object? GetAt(int distance, string name) =>
+            Ancestor(distance).values[name];
 
-        public void AssignAt(int distance, Token name, object? value)
-        {
+        public void AssignAt(int distance, Token name, object? value) =>
             Ancestor(distance).values[name.Lexeme] = value;
-        }
 
         Environment Ancestor(int distance)
         {
