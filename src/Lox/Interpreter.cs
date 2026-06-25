@@ -2,9 +2,22 @@
 
 namespace Lox
 {
-    public class Interpreter(ConsoleWriter console, IErrorHandler error) : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
+    public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
     {
-        Environment environment = new();
+        readonly ConsoleWriter console;
+        readonly IErrorHandler error;
+        public Environment Globals { get; }
+        Environment environment;
+
+        public Interpreter(ConsoleWriter console, IErrorHandler error)
+        {
+            this.console = console;
+            this.error = error;
+            Globals = new();
+            environment = Globals;
+
+            Globals.Define("clock", new ILoxCallable.Clock());
+        }
 
         public void Interpret(List<Stmt> statements)
         {
@@ -97,6 +110,29 @@ namespace Lox
             return null;
         }
 
+        object? Expr.IVisitor<object?>.VisitCallExpr(Expr.Call expr)
+        {
+            var callee = Evaluate(expr.Callee);
+
+            var arguments = new List<object?>();
+            foreach (var argument in expr.Arguments)
+            {
+                arguments.Add(Evaluate(argument));
+            }
+
+            if (callee is not ILoxCallable function)
+            {
+                throw new RuntimeException(expr.Paren, "Can only call functions and classes.");
+            }
+
+            if (arguments.Count != function.Arity())
+            {
+                throw new RuntimeException(expr.Paren, $"Expected {function.Arity()} arguments but got {arguments.Count}.");
+            }
+
+            return function.Call(this, arguments);
+        }
+
         object? Expr.IVisitor<object?>.VisitGroupingExpr(Expr.Grouping expr)
         {
             return Evaluate(expr.Expr);
@@ -161,7 +197,7 @@ namespace Lox
             stmt.Accept(this);
         }
 
-        void ExecuteBlock(List<Stmt> statements, Environment environment)
+        public void ExecuteBlock(List<Stmt> statements, Environment environment)
         {
             var previous = this.environment;
             try
@@ -240,6 +276,13 @@ namespace Lox
             return null;
         }
 
+        object? Stmt.IVisitor<object?>.VisitFunctionStmt(Stmt.Function stmt)
+        {
+            var function = new LoxFunction(stmt, environment);
+            environment.Define(stmt.Name.Lexeme, function);
+            return null;
+        }
+
         object? Stmt.IVisitor<object?>.VisitIfStmt(Stmt.If stmt)
         {
             if (IsTruthy(Evaluate(stmt.Condition)))
@@ -258,6 +301,17 @@ namespace Lox
             var value = Evaluate(stmt.Expr);
             console.StdOutLn(Stringify(value));
             return null;
+        }
+
+        object? Stmt.IVisitor<object?>.VisitReturnStmt(Stmt.Return stmt)
+        {
+            object? value = null;
+            if (stmt.Value != null)
+            {
+                value = Evaluate(stmt.Value);
+            }
+
+            throw new ReturnException(value);
         }
 
         object? Stmt.IVisitor<object?>.VisitVarStmt(Stmt.Var stmt)

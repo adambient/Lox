@@ -7,6 +7,7 @@ namespace Lox
         {
             TOut VisitAssignExpr(Assign expr);
             TOut VisitBinaryExpr(Binary expr);
+            TOut VisitCallExpr(Call expr);
             TOut VisitGroupingExpr(Grouping expr);
             TOut VisitLiteralExpr(Literal expr);
             TOut VisitLogicalExpr(Logical expr);
@@ -22,6 +23,11 @@ namespace Lox
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitBinaryExpr(this);
+        }
+        public record Call(Expr Callee, Token Paren, List<Expr> Arguments) : Expr
+        {
+            public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
+                visitor.VisitCallExpr(this);
         }
         public record Grouping(Expr Expr) : Expr
         {

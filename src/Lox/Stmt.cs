@@ -7,8 +7,10 @@ namespace Lox
         {
             TOut VisitBlockStmt(Block stmt);
             TOut VisitExpressionStmt(Expression stmt);
+            TOut VisitFunctionStmt(Function stmt);
             TOut VisitIfStmt(If stmt);
             TOut VisitPrintStmt(Print stmt);
+            TOut VisitReturnStmt(Return stmt);
             TOut VisitVarStmt(Var stmt);
             TOut VisitWhileStmt(While stmt);
         }
@@ -22,6 +24,11 @@ namespace Lox
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitExpressionStmt(this);
         }
+        public record Function(Token Name, List<Token> Params, List<Stmt> Body) : Stmt
+        {
+            public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
+                visitor.VisitFunctionStmt(this);
+        }
         public record If(Expr Condition, Stmt ThenBranch, Stmt? ElseBranch) : Stmt
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
@@ -31,6 +38,11 @@ namespace Lox
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitPrintStmt(this);
+        }
+        public record Return(Token Keyword, Expr? Value) : Stmt
+        {
+            public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
+                visitor.VisitReturnStmt(this);
         }
         public record Var(Token Name, Expr? Init) : Stmt
         {
