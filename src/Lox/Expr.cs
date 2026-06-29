@@ -8,9 +8,12 @@ namespace Lox
             TOut VisitAssignExpr(Assign expr);
             TOut VisitBinaryExpr(Binary expr);
             TOut VisitCallExpr(Call expr);
+            TOut VisitGetExpr(Get expr);
             TOut VisitGroupingExpr(Grouping expr);
             TOut VisitLiteralExpr(Literal expr);
             TOut VisitLogicalExpr(Logical expr);
+            TOut VisitSetExpr(Set expr);
+            TOut VisitThisExpr(This expr);
             TOut VisitUnaryExpr(Unary expr);
             TOut VisitVariableExpr(Variable expr);
         }
@@ -29,6 +32,11 @@ namespace Lox
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitCallExpr(this);
         }
+        public record Get(Expr Obj, Token Name) : Expr
+        {
+            public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
+                visitor.VisitGetExpr(this);
+        }
         public record Grouping(Expr Expr) : Expr
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
@@ -43,6 +51,16 @@ namespace Lox
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitLogicalExpr(this);
+        }
+        public record Set(Expr Obj, Token Name, Expr? Value) : Expr
+        {
+            public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
+                visitor.VisitSetExpr(this);
+        }
+        public record This(Token Keyword) : Expr
+        {
+            public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
+                visitor.VisitThisExpr(this);
         }
         public record Unary(Token Operator, Expr Right) : Expr
         {

@@ -141,6 +141,17 @@ namespace Lox
             return function.Call(this, arguments);
         }
 
+        object? Expr.IVisitor<object?>.VisitGetExpr(Expr.Get expr)
+        {
+            var obj = Evaluate(expr.Obj);
+            if (obj is LoxInstance loxInstance)
+            {
+                return loxInstance.Get(expr.Name);
+            }
+
+            throw new RuntimeException(expr.Name, "only instances have properties.");
+        }
+
         object? Expr.IVisitor<object?>.VisitGroupingExpr(Expr.Grouping expr) =>
             Evaluate(expr.Expr);
 
@@ -167,6 +178,23 @@ namespace Lox
 
             return Evaluate(expr.Right);
         }
+
+        object? Expr.IVisitor<object?>.VisitSetExpr(Expr.Set expr)
+        {
+            var obj = Evaluate(expr.Obj);
+
+            if (obj is not LoxInstance loxInstance)
+            {
+                throw new RuntimeException(expr.Name, "Only instances have fields.");
+            }
+
+            var value = Evaluate(expr.Value);
+            loxInstance.Set(expr.Name, value);
+            return value;
+        }
+
+        object? Expr.IVisitor<object?>.VisitThisExpr(Expr.This expr) =>
+            LookUpVariable(expr.Keyword, expr);
 
         object? Expr.IVisitor<object?>.VisitUnaryExpr(Expr.Unary expr)
         {
@@ -199,8 +227,8 @@ namespace Lox
             }
         }
 
-        object? Evaluate(Expr expr) =>
-            expr.Accept(this);
+        object? Evaluate(Expr? expr) =>
+            expr?.Accept(this);
 
         void Execute(Stmt stmt) =>
             stmt.Accept(this);
@@ -281,6 +309,22 @@ namespace Lox
             return null;
         }
 
+        object? Stmt.IVisitor<object?>.VisitClassStmt(Stmt.Class stmt)
+        {
+            environment.Define(stmt.Name.Lexeme, null);
+
+            var methods = new Dictionary<string, LoxFunction>();
+            foreach (var method in stmt.Methods)
+            {
+                var function = new LoxFunction(method, environment, method.Name.Lexeme == "init");
+                methods[method.Name.Lexeme] = function;
+            }
+
+            var klass = new LoxClass(stmt.Name.Lexeme, methods);
+            environment.Assign(stmt.Name, klass);
+            return null;
+        }
+
         object? Stmt.IVisitor<object?>.VisitExpressionStmt(Stmt.Expression stmt)
         {
             Evaluate(stmt.Expr);
@@ -289,7 +333,7 @@ namespace Lox
 
         object? Stmt.IVisitor<object?>.VisitFunctionStmt(Stmt.Function stmt)
         {
-            var function = new LoxFunction(stmt, environment);
+            var function = new LoxFunction(stmt, environment, false);
             environment.Define(stmt.Name.Lexeme, function);
             return null;
         }

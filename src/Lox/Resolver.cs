@@ -7,11 +7,20 @@ namespace Lox
         enum FunctionTypeEnum
         {
             NONE,
-            FUNCTION
+            FUNCTION,
+            INITIALIZER,
+            METHOD
+        }
+
+        enum ClassTypeEnum
+        {
+            NONE,
+            CLASS
         }
 
         readonly Stack<Dictionary<string, bool>> scopes = new();
         FunctionTypeEnum currentFunction = FunctionTypeEnum.NONE;
+        ClassTypeEnum currentClass = ClassTypeEnum.NONE;
 
         object? Expr.IVisitor<object?>.VisitAssignExpr(Expr.Assign expr)
         {
@@ -35,6 +44,33 @@ namespace Lox
             return null;
         }
 
+        object? Stmt.IVisitor<object?>.VisitClassStmt(Stmt.Class stmt)
+        {
+            var enclosingClass = currentClass;
+            currentClass = ClassTypeEnum.CLASS;
+
+            Declare(stmt.Name);
+            Define(stmt.Name);
+
+            BeginScope();
+            scopes.Peek()["this"] = true;
+
+            foreach (var method in stmt.Methods)
+            {
+                var declaration = FunctionTypeEnum.METHOD;
+                if (method.Name.Lexeme == "init")
+                {
+                    declaration = FunctionTypeEnum.INITIALIZER;
+                }
+                ResolveFunction(method, declaration);
+            }
+
+            EndScope();
+
+            currentClass = enclosingClass;
+            return null;
+        }
+
         public void Resolve(List<Stmt> statements)
         {
             foreach (var statement in statements)
@@ -48,9 +84,9 @@ namespace Lox
             stmt.Accept(this);
         }
 
-        void Resolve(Expr expr)
+        void Resolve(Expr? expr)
         {
-            expr.Accept(this);
+            expr?.Accept(this);
         }
 
         void ResolveFunction(Stmt.Function function, FunctionTypeEnum type)
@@ -83,6 +119,12 @@ namespace Lox
                 Resolve(argument);
             }
 
+            return null;
+        }
+
+        object? Expr.IVisitor<object?>.VisitGetExpr(Expr.Get expr)
+        {
+            Resolve(expr.Obj);
             return null;
         }
 
@@ -130,6 +172,24 @@ namespace Lox
             return null;
         }
 
+        object? Expr.IVisitor<object?>.VisitSetExpr(Expr.Set expr)
+        {
+            Resolve(expr.Value);
+            Resolve(expr.Obj);
+            return null;
+        }
+
+        object? Expr.IVisitor<object?>.VisitThisExpr(Expr.This expr)
+        {
+            if (currentClass == ClassTypeEnum.NONE)
+            {
+                error.Error(expr.Keyword, "Can't use 'this' outside of a class.");
+            }
+
+            ResolveLocal(expr, expr.Keyword);
+            return null;
+        }
+
         object? Stmt.IVisitor<object?>.VisitPrintStmt(Stmt.Print stmt)
         {
             Resolve(stmt.Expr);
@@ -145,6 +205,11 @@ namespace Lox
 
             if (stmt.Value != null)
             {
+                if (currentFunction == FunctionTypeEnum.INITIALIZER)
+                {
+                    error.Error(stmt.Keyword, "Can't return a value from an initializer.");
+                }
+
                 Resolve(stmt.Value);
             }
 

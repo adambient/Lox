@@ -6,6 +6,7 @@ namespace Lox
         public interface IVisitor<TOut>
         {
             TOut VisitBlockStmt(Block stmt);
+            TOut VisitClassStmt(Class stmt);
             TOut VisitExpressionStmt(Expression stmt);
             TOut VisitFunctionStmt(Function stmt);
             TOut VisitIfStmt(If stmt);
@@ -18,6 +19,11 @@ namespace Lox
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitBlockStmt(this);
+        }
+        public record Class(Token Name, List<Stmt.Function> Methods) : Stmt
+        {
+            public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
+                visitor.VisitClassStmt(this);
         }
         public record Expression(Expr Expr) : Stmt
         {
