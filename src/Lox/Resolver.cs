@@ -15,7 +15,8 @@ namespace Lox
         enum ClassTypeEnum
         {
             NONE,
-            CLASS
+            CLASS,
+            SUBCLASS
         }
 
         readonly Stack<Dictionary<string, bool>> scopes = new();
@@ -52,6 +53,23 @@ namespace Lox
             Declare(stmt.Name);
             Define(stmt.Name);
 
+            if (stmt.Superclass != null && stmt.Name.Lexeme == stmt.Superclass.Name.Lexeme)
+            {
+                error.Error(stmt.Superclass.Name, "A class can't inherit from itself.");
+            }
+
+            if (stmt.Superclass != null)
+            {
+                currentClass = ClassTypeEnum.SUBCLASS;
+                Resolve(stmt.Superclass);
+            }
+
+            if (stmt.Superclass != null)
+            {
+                BeginScope();
+                scopes.Peek()["super"] = true;
+            }
+
             BeginScope();
             scopes.Peek()["this"] = true;
 
@@ -66,6 +84,11 @@ namespace Lox
             }
 
             EndScope();
+
+            if (stmt.Superclass != null)
+            {
+                EndScope();
+            }
 
             currentClass = enclosingClass;
             return null;
@@ -176,6 +199,21 @@ namespace Lox
         {
             Resolve(expr.Value);
             Resolve(expr.Obj);
+            return null;
+        }
+
+        object? Expr.IVisitor<object?>.VisitSuperExpr(Expr.Super expr)
+        {
+            if (currentClass == ClassTypeEnum.NONE)
+            {
+                error.Error(expr.Keyword, "Can't use 'super' outside of a class.");
+            }
+            else if (currentClass != ClassTypeEnum.SUBCLASS)
+            {
+                error.Error(expr.Keyword, "Can't use 'super' in a class with no superclass.");
+            }
+
+            ResolveLocal(expr, expr.Keyword);
             return null;
         }
 

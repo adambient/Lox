@@ -20,7 +20,7 @@ namespace Lox
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitBlockStmt(this);
         }
-        public record Class(Token Name, List<Stmt.Function> Methods) : Stmt
+        public record Class(Token Name, Expr.Variable? Superclass, List<Stmt.Function> Methods) : Stmt
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitClassStmt(this);

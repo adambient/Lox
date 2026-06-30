@@ -13,7 +13,7 @@
             this.isInitializer = isInitializer;
         }
 
-        public LoxFunction Bind(LoxInstance instance)
+        public LoxFunction Bind(LoxInstance? instance)
         {
             var environment = new Environment(closure);
             environment.Define("this", instance);

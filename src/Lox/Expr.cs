@@ -13,6 +13,7 @@ namespace Lox
             TOut VisitLiteralExpr(Literal expr);
             TOut VisitLogicalExpr(Logical expr);
             TOut VisitSetExpr(Set expr);
+            TOut VisitSuperExpr(Super expr);
             TOut VisitThisExpr(This expr);
             TOut VisitUnaryExpr(Unary expr);
             TOut VisitVariableExpr(Variable expr);
@@ -56,6 +57,11 @@ namespace Lox
         {
             public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
                 visitor.VisitSetExpr(this);
+        }
+        public record Super(Token Keyword, Token Method) : Expr
+        {
+            public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>
+                visitor.VisitSuperExpr(this);
         }
         public record This(Token Keyword) : Expr
         {

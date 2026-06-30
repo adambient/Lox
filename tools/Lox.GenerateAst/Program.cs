@@ -24,6 +24,7 @@ namespace Lox.GenerateAst
                 "Literal  : object? Value",
                 "Logical  : Expr Left, Token Operator, Expr Right",
                 "Set      : Expr Obj, Token Name, Expr? Value",
+                "Super    : Token Keyword, Token Method",
                 "This     : Token Keyword",
                 "Unary    : Token Operator, Expr Right",
                 "Variable : Token Name"
@@ -31,7 +32,7 @@ namespace Lox.GenerateAst
 
             await DefineAstAsync(outputDir, "Stmt", [
                 "Block      : List<Stmt> Statements",
-                "Class      : Token Name, List<Stmt.Function> Methods",
+                "Class      : Token Name, Expr.Variable? Superclass, List<Stmt.Function> Methods",
                 "Expression : Expr Expr",
                 "Function   : Token Name, List<Token> Params, List<Stmt> Body",
                 "If         : Expr Condition, Stmt ThenBranch, Stmt? ElseBranch",

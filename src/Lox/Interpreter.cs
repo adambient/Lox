@@ -193,6 +193,20 @@ namespace Lox
             return value;
         }
 
+        object? Expr.IVisitor<object?>.VisitSuperExpr(Expr.Super expr)
+        {
+            int distance = locals[expr];
+            var superclass = (LoxClass?)environment.GetAt(distance, "super");
+            var obj = (LoxInstance?)environment.GetAt(distance - 1, "this");
+            var method = superclass?.FindMethod(expr.Method.Lexeme);
+            if (method == null)
+            {
+                throw new RuntimeException(expr.Method, $"Undefined property '{expr.Method.Lexeme}'.");
+            }
+
+            return method.Bind(obj);
+        }
+
         object? Expr.IVisitor<object?>.VisitThisExpr(Expr.This expr) =>
             LookUpVariable(expr.Keyword, expr);
 
@@ -311,7 +325,23 @@ namespace Lox
 
         object? Stmt.IVisitor<object?>.VisitClassStmt(Stmt.Class stmt)
         {
+            object? superclass = null;
+            if (stmt.Superclass != null)
+            {
+                superclass = Evaluate(stmt.Superclass);
+                if (superclass is not LoxClass)
+                {
+                    throw new RuntimeException(stmt.Superclass.Name, "Superclass must be a class.");
+                }
+            }
+
             environment.Define(stmt.Name.Lexeme, null);
+
+            if (stmt.Superclass != null)
+            {
+                environment = new Environment(environment);
+                environment.Define("super", superclass);
+            }
 
             var methods = new Dictionary<string, LoxFunction>();
             foreach (var method in stmt.Methods)
@@ -320,7 +350,13 @@ namespace Lox
                 methods[method.Name.Lexeme] = function;
             }
 
-            var klass = new LoxClass(stmt.Name.Lexeme, methods);
+            var klass = new LoxClass(stmt.Name.Lexeme, (LoxClass?)superclass, methods);
+
+            if (superclass != null)
+            {
+                environment = environment.Enclosing!;
+            }
+
             environment.Assign(stmt.Name, klass);
             return null;
         }

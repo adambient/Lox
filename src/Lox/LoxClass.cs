@@ -3,11 +3,13 @@
     public class LoxClass : ILoxCallable
     {
         readonly string name;
+        readonly LoxClass? superclass;
         readonly Dictionary<string, LoxFunction> methods;
 
-        public LoxClass(string name, Dictionary<string, LoxFunction> methods)
+        public LoxClass(string name, LoxClass? superclass, Dictionary<string, LoxFunction> methods)
         {
             this.name = name;
+            this.superclass = superclass;
             this.methods = methods;
         }
 
@@ -16,6 +18,11 @@
             if (methods.ContainsKey(name))
             {
                 return methods[name];
+            }
+
+            if (superclass != null)
+            {
+                return superclass.FindMethod(name);
             }
 
             return null; ;
