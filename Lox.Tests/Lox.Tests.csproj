@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Lox\Lox.csproj" />
+    <ProjectReference Include="..\Lox\Lox.csproj" />
   </ItemGroup>
 
   <ItemGroup>

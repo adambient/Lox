@@ -60,7 +60,6 @@ namespace Lox
         Stmt ClassDeclaration()
         {
             var name = Consume(IDENTIFIER, "Expect class name.");
-
             Expr.Variable? superclass = null;
             if (Match(LESS))
             {
@@ -69,7 +68,6 @@ namespace Lox
             }
 
             Consume(LEFT_BRACE, "Expect '{' before class body.");
-
             var methods = new List<Stmt.Function>();
             while (!Check(RIGHT_BRACE) && !IsAtEnd())
             {
@@ -77,7 +75,6 @@ namespace Lox
             }
 
             Consume(RIGHT_BRACE, "Expect '}' after class body.");
-
             return new Stmt.Class(name, superclass, methods);
         }
 
@@ -221,7 +218,6 @@ namespace Lox
             var condition = Expression();
             Consume(RIGHT_PAREN, "Expect ')' after condition.");
             var body = Statement();
-
             return new Stmt.While(condition, body);
         }
 

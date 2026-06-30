@@ -2,7 +2,7 @@
 {
     public class LoxInstance
     {
-        LoxClass klass;
+        readonly LoxClass klass;
         readonly Dictionary<string, object?> fields = new();
 
         public LoxInstance(LoxClass klass)

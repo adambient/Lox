@@ -21,6 +21,7 @@
         }
 
         public int Arity() => declaration.Params.Count;
+
         public object? Call(Interpreter interpreter, List<object?> arguments)
         {
             var environment = new Environment(closure);
@@ -50,6 +51,7 @@
 
             return null;
         }
+
         public override string ToString() => $"<fn {declaration.Name.Lexeme}>";
     }
 }

@@ -181,7 +181,6 @@ namespace Lox
 
             // the closing "
             Advance();
-
             // trim the surrounding quotes
             var value = source.Substring(start + 1, current - start - 2);
             AddToken(STRING, value);
@@ -199,7 +198,6 @@ namespace Lox
             {
                 // consume the "."
                 Advance();
-
                 while (IsDigit(Peek()))
                 {
                     Advance();

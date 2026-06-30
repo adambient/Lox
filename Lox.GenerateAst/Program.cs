@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Lox.GenerateAst
+namespace Lox.Ast
 {
     internal class Program
     {
@@ -9,7 +9,7 @@ namespace Lox.GenerateAst
         static async Task<int> Main(string[] args)
         {
             // default to our own location
-            var outputDir = "C:\\projects\\lox\\src\\Lox\\";
+            var outputDir = "C:\\projects\\lox\\Lox\\";
             if (args.Length >= 1)
             {
                 outputDir = args[0];
@@ -29,7 +29,6 @@ namespace Lox.GenerateAst
                 "Unary    : Token Operator, Expr Right",
                 "Variable : Token Name"
                 ]);
-
             await DefineAstAsync(outputDir, "Stmt", [
                 "Block      : List<Stmt> Statements",
                 "Class      : Token Name, Expr.Variable? Superclass, List<Stmt.Function> Methods",
@@ -41,7 +40,6 @@ namespace Lox.GenerateAst
                 "Var        : Token Name, Expr? Init",
                 "While      : Expr Condition, Stmt Body"
                 ]);
-
             return 0;
         }
 
@@ -55,9 +53,7 @@ namespace Lox.GenerateAst
                 await writer.WriteLineAsync("{");                
                 await writer.WriteLineAsync($"{TAB}public abstract record {baseName}");
                 await writer.WriteLineAsync($"{TAB}{{");
-
                 await DefineVisitorAsync(writer, baseName, types);
-
                 // the AST classes
                 foreach (var type in types)
                 {
@@ -69,8 +65,6 @@ namespace Lox.GenerateAst
                 // the base Accept() method
                 await writer.WriteLineAsync();
                 await writer.WriteLineAsync($"{TAB}{TAB}public abstract TOut Accept<TOut>(IVisitor<TOut> visitor);");
-
-
                 await writer.WriteLineAsync($"{TAB}}}");
                 await writer.WriteLineAsync("}");
             }
@@ -79,11 +73,9 @@ namespace Lox.GenerateAst
             {
                 await writer.WriteLineAsync($"{TAB}{TAB}public record {className}({fieldList}) : {baseName}");
                 await writer.WriteLineAsync($"{TAB}{TAB}{{");
-
                 // visitor pattern
                 await writer.WriteLineAsync($"{TAB}{TAB}{TAB}public override TOut Accept<TOut>(IVisitor<TOut> visitor) =>");
                 await writer.WriteLineAsync($"{TAB}{TAB}{TAB}{TAB}visitor.Visit{className}{baseName}(this);");
-
                 await writer.WriteLineAsync($"{TAB}{TAB}}}");
             }
 
@@ -91,7 +83,6 @@ namespace Lox.GenerateAst
             {
                 await writer.WriteLineAsync($"{TAB}{TAB}public interface IVisitor<TOut>");
                 await writer.WriteLineAsync($"{TAB}{TAB}{{");
-
                 foreach (var type in types)
                 {
                     var typeName = type.Split(":")[0].Trim();

@@ -1,6 +1,4 @@
-﻿using static Lox.Expr;
-
-namespace Lox
+﻿namespace Lox
 {
     public class Resolver(Interpreter interpreter, IErrorHandler error) : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
     {

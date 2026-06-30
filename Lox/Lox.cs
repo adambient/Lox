@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Lox
+﻿namespace Lox
 {
     public class Lox : IErrorHandler
     {
@@ -15,9 +13,9 @@ namespace Lox
             interpreter = new Interpreter(console, this);
         }
 
-        public int Run(string source)
+        public int Run(string? source)
         {
-            var scanner = new Scanner(source, this);
+            var scanner = new Scanner(source ?? string.Empty, this);
             var tokens = scanner.ScanTokens();
             var parser = new Parser(tokens, this);
             var statements = parser.Parse();            

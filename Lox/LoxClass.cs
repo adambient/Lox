@@ -44,7 +44,6 @@
         object? ILoxCallable.Call(Interpreter interpreter, List<object?> arguments)
         {
             var instance = new LoxInstance(this);
-
             var initializer = FindMethod("init");
             if (initializer != null)
             {

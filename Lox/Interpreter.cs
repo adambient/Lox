@@ -5,10 +5,11 @@ namespace Lox
     public class Interpreter : Expr.IVisitor<object?>, Stmt.IVisitor<object?>
     {
         readonly ConsoleWriter console;
-        readonly IErrorHandler error;
-        public Environment Globals { get; }
-        Environment environment;
+        readonly IErrorHandler error;                
         readonly Dictionary<Expr, int> locals = new();
+        Environment environment;
+
+        public Environment Globals { get; }
 
         public Interpreter(ConsoleWriter console, IErrorHandler error)
         {
@@ -182,7 +183,6 @@ namespace Lox
         object? Expr.IVisitor<object?>.VisitSetExpr(Expr.Set expr)
         {
             var obj = Evaluate(expr.Obj);
-
             if (obj is not LoxInstance loxInstance)
             {
                 throw new RuntimeException(expr.Name, "Only instances have fields.");
@@ -336,7 +336,6 @@ namespace Lox
             }
 
             environment.Define(stmt.Name.Lexeme, null);
-
             if (stmt.Superclass != null)
             {
                 environment = new Environment(environment);
@@ -351,7 +350,6 @@ namespace Lox
             }
 
             var klass = new LoxClass(stmt.Name.Lexeme, (LoxClass?)superclass, methods);
-
             if (superclass != null)
             {
                 environment = environment.Enclosing!;
