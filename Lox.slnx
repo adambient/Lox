@@ -4,5 +4,5 @@
   </Folder>
   <Project Path="Lox/Lox.csproj" />
   <Project Path="Lox.Tests/Lox.Tests.csproj" />
-  <Project Path="Lox.GenerateAst/Lox.Ast.csproj" />
+  <Project Path="Lox.Ast/Lox.Ast.csproj" />
 </Solution>

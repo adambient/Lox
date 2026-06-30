@@ -19,8 +19,8 @@ This solution currently implements the interpreter side of the book rather than 
 ## Repository Layout
 
 - [`Lox/`](./Lox) - main executable project containing the interpreter
+- [`Lox.Ast/`](./Lox.Ast) - helper project that generates the AST node files
 - [`Lox.Tests/`](./Lox.Tests) - unit tests for valid and invalid interpreter scenarios
-- [`Lox.GenerateAst/`](./Lox.GenerateAst) - helper project that generates the AST node files
 - [`Lox.slnx`](./Lox.slnx) - solution file
 
 ## Requirements
