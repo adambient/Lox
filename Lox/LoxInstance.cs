@@ -23,7 +23,7 @@
                 return method.Bind(this);
             }
 
-            throw new RuntimeException(name, $"Undefined proeprty '{name.Lexeme}'.");
+            throw new RuntimeException(name, $"Undefined property '{name.Lexeme}'.");
         }
 
         public void Set(Token name, object? value) =>

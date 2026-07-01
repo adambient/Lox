@@ -53,14 +53,16 @@ The executable follows the common Lox conventions used in the book:
 
 ## Tests
 
-The test project uses Machine.Specifications and currently contains 23 specifications that exercise:
+The test project uses Machine.Specifications and currently contains 203 specifications. Each Crafting Interpreters `.lox` fixture that this project supports now has its own dedicated spec class with the script text inlined directly in the test, so the test output stays easy to trace back to the source case.
+
+The suite covers:
 
 - basic expressions
 - blocks and lexical scope
 - `if`, `while`, and `for`
 - functions and closures
 - classes and subclassing
-- parser and resolver error cases
+- parser, resolver, and runtime error cases
 
 Run the full test suite with:
 
@@ -76,3 +78,11 @@ dotnet test
 
 - The code is intentionally close to the structure from *Crafting Interpreters* so it is easy to compare against the book.
 - The current implementation is a learning project and does not include the bytecode compiler/VM from the later chapters.
+- A few implementation details differ from the book so the C# version behaves consistently and matches the tests:
+  - Numbers are formatted with invariant culture, so decimal output is stable on every machine.
+  - Booleans print as `true` and `false` in lowercase, matching Lox output.
+  - `NaN` compares as not equal to anything, including itself.
+  - Assignment parsing reports `Invalid assignment target.` when the left-hand side is not assignable.
+  - Property and method lookup errors use exact messages such as `Only instances have properties.` and `Undefined property 'name'.`
+  - Scope resolution walks outward correctly so the nearest binding wins in nested closures and blocks.
+  - `GetAt(...)` falls back to normal lookup when needed, which keeps class and `super` resolution aligned with the interpreter’s runtime model.

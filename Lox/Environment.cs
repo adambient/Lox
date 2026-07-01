@@ -43,8 +43,16 @@
         public void Define(string name, object? value) =>
             values[name] = value;
 
-        public object? GetAt(int distance, string name) =>
-            Ancestor(distance).values[name];
+        public object? GetAt(int distance, string name)
+        {
+            var ancestor = Ancestor(distance);
+            if (ancestor.values.TryGetValue(name, out var value))
+            {
+                return value;
+            }
+
+            return ancestor.Get(new Token(TokenTypeEnum.IDENTIFIER, name, null, 0));
+        }
 
         public void AssignAt(int distance, Token name, object? value) =>
             Ancestor(distance).values[name.Lexeme] = value;

@@ -272,7 +272,7 @@
         void ResolveLocal(Expr expr, Token name)
         {
             var scopesArray = scopes.ToArray();
-            for (int i = scopesArray.Length - 1; i >= 0; i--)
+            for (int i = 0; i < scopesArray.Length; i++)
             {
                 if (scopesArray[i].ContainsKey(name.Lexeme))
                 {

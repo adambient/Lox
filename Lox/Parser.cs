@@ -284,6 +284,8 @@ namespace Lox
                 {
                     return new Expr.Set(getExpr.Obj, getExpr.Name, value);
                 }
+
+                throw Error(equals, "Invalid assignment target.");
             }
 
             return expr;

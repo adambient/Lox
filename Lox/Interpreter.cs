@@ -1,4 +1,5 @@
-﻿using static Lox.TokenTypeEnum;
+using System.Globalization;
+using static Lox.TokenTypeEnum;
 
 namespace Lox
 {
@@ -45,13 +46,18 @@ namespace Lox
 
             if (value is double doubleValue)
             {
-                var text = doubleValue.ToString();
+                var text = doubleValue.ToString(CultureInfo.InvariantCulture);
                 if (text.EndsWith(".0"))
                 {
                     text = text.Substring(0, text.Length - 2);
                 }
 
                 return text;
+            }
+
+            if (value is bool boolValue)
+            {
+                return boolValue ? "true" : "false";
             }
 
             return value.ToString();
@@ -150,7 +156,7 @@ namespace Lox
                 return loxInstance.Get(expr.Name);
             }
 
-            throw new RuntimeException(expr.Name, "only instances have properties.");
+            throw new RuntimeException(expr.Name, "Only instances have properties.");
         }
 
         object? Expr.IVisitor<object?>.VisitGroupingExpr(Expr.Grouping expr) =>
@@ -292,6 +298,14 @@ namespace Lox
             if (lhs == null)
             {
                 return false;
+            }
+
+            if (lhs is double leftDouble && rhs is double rightDouble)
+            {
+                if (double.IsNaN(leftDouble) || double.IsNaN(rightDouble))
+                {
+                    return false;
+                }
             }
 
             return lhs.Equals(rhs);
